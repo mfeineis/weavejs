@@ -1,0 +1,212 @@
+<template>
+    <style>
+        form {
+            border: 1px solid black;
+        }
+        label {
+            display: block;
+        }
+        .block {
+            display: block;
+        }
+        .hidden {
+            display: none;
+        }
+        .font-weight-bold {
+            font-weight: bold;
+        }
+        .italic {
+            font-style: italic;
+        }
+        .text-red {
+            color: red;
+        }
+        .small-caps {
+            font-variant: small-caps;
+        }
+        .line-through {
+            text-decoration-line: line-through;
+        }
+        .opacity-0\.5 {
+            opacity: 0.5;
+        }
+    </style>
+    <form onsubmit.bind="submit(event, this)">
+        <div>
+            <b>
+                <slot></slot>
+                <span>(${someLabel})</span>
+            </b>
+        </div>
+        <div>
+            <x-dummy attr.bind.data-id="input" prop.bind="input"></x-dummy>
+        </div>
+        <label>
+            <input type="text" value.bind="input">
+            <input class="opacity-0.5" type="text" value.bind.one-way="input">
+            <span>${input}</span>
+            <textarea class="block" value.bind="input"></textarea>
+            <textarea class="block" readonly value.bind="input"></textarea>
+        </label>
+        <div class.bind.hidden="!visible">
+            class.bind.hidden="!visible"
+        </div>
+        <div class.bind.hidden="visible">
+            class.bind.hidden="visible"
+        </div>
+        <label><input type="checkbox" checked.bind.one-way="visible">checked.bind.one-way="visible"</label>
+        <div class.bind="classList">
+            [${classList}]
+        </div>
+        <div class.bind="classObj">
+            {${classObj}}
+        </div>
+        <div class.bind="classStr">
+            "${classStr}"
+        </div>
+        <div class.bind="classNone">
+            ${classNone}
+        </div>
+        <div>
+            <ul>
+                <li>${items}</li>
+                <li repeat.for="item of items">
+                    ${item.id}: ${item.name}
+                    <button type="button" onclick.bind="removeItem(item)">-</button>
+                </li>
+                <li><button type="button" onclick.bind="addItem()">+</button></li>
+            </ul>
+            <div innerhtml.bind="markup">OVERRIDDEN CONTENT</div>
+            <div oninput.bind="contentChanged(event)" contenteditable.bind="isEditable">contenteditable</div>
+        </div>
+        <label>
+            <input type="checkbox" checked.bind="accept">
+            <span>Accept</span>
+            <span>${accept}</span>
+        </label>
+        <fieldset>
+            <div>${flavor.name}</div>
+            <div>${computedValue}</div>
+            <label>
+                <input type="radio" value="red" name="flavor" checked.bind="flavor.name">
+                <span>red</span>
+            </label>
+            <label>
+                <input type="radio" value="green" name="flavor" checked.bind="flavor.name">
+                <span>green</span>
+            </label>
+            <label>
+                <input type="radio" value="blue" name="flavor" checked.bind="flavor.name">
+                <span>blue</span>
+            </label>
+        </fieldset>
+        <label>
+            <span>Static Items</span>
+            <select value.bind="selected">
+                <option value="">- Select an item -</option>
+                <option value="static_a">Static A</option>
+                <option value="static_b">Static B</option>
+            </select>
+            <span>${selected}</span>
+        </label>
+        <label>
+            <span>Dynamic Items</span>
+            <select value.bind="selected">
+                <option value="">- Select an item -</option>
+                <option repeat.for="item of items" value.bind="item.id">
+                    ${item.name}
+                </option>
+            </select>
+            <span>${selected}</span>
+        </label>
+        <div>
+            <button onclick.bind.prevent.stop="browse(event)">Browse...</button>
+            <button onclick.bind.prevent="toggleAccept()">Accept</button>
+            <button class.bind="visibleButtonCss" onclick.bind.prevent="toggleVisible()">
+                Visible
+            </button>
+        </div>
+        <button type="submit">Send</button>
+        <!--
+        -->
+    </form>
+    <script type="module">
+
+        import { } from "weave";
+
+        class Component {
+            selected = "nothing";
+            accept;
+
+            items = [
+                { id: 'id-1', name: 'Item 1' },
+                { id: 'id-2', name: 'Item 2' },
+                { id: 'id-3', name: 'Item 3' },
+            ];
+
+            someLabel = "some-label-value";
+
+            visible = true;
+
+            classList = ["font-weight-bold", "italic", "text-red"];
+            classObj = { "small-caps": 1, "font-weight-bold": 1, "text-red": 0 };
+            classStr = "text-red";
+            classNone = null;
+
+            input = "Text Input";
+
+            markup = "<b>innerHTML</b>";
+
+            flavor = { name: null };
+
+            isEditable = true;
+
+            get computedValue() {
+                return `${this.input} - ${this.selected}`;
+            }
+
+            get visibleButtonCss() {
+                return [this.visible ? "" : "line-through"];
+            }
+
+            static requires = ({ Store }) => [Store];
+
+            constructor(store) {
+                // super(...args);
+                console.log("new Component(", store, ")");
+            }
+
+            onUpdate() { }
+
+            addItem() {
+                console.log("vm.addItem()");
+                this.items.push({ id: `${Math.random()}`, name: 'New Item' });
+            }
+            removeItem(item) {
+                console.log("vm.removeItem(", item, ")");
+                const ix = this.items.findIndex(x => x === item);
+                if (ix >= 0) {
+                    this.items.splice(ix, 1);
+                }
+                // this.items = this.items.filter(x => x !== item);
+            }
+
+            contentChanged(event) {
+                console.log("vm.contentChanged(", event, ")", this);
+            }
+            browse(event) {
+                console.log("vm.browser(", event, ")", this);
+            }
+            toggleAccept() {
+                this.accept = !this.accept;
+            }
+            toggleVisible() {
+                this.visible = !this.visible;
+            }
+            submit(event, node) {
+                console.log("vm.submit(", event, node, ")", this);
+            }
+        }
+
+    </script>
+</template>

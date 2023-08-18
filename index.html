@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>weavejs Playground</title>
+    <script type="importmap">
+        {
+            "imports": {
+                "weave": "./cdn/weave.js",
+                "site": "./cdn/site.js"
+            }
+        }
+    </script>
+    <script type="module">
+        import { config } from "weave";
+        import { Store, LocalStorageStore } from "site";
+
+        config({
+            shouldHandleElement(tagName) {
+                return /^x-/i.test(tagName);
+            },
+            compositionRoot({ singleton }) {
+                singleton(Store, () => new LocalStorageStore());
+            },
+        });
+    </script>
+</head>
+<body>
+    <script>
+        function another() {
+            const snd = document.createElement("x-test");
+            snd.innerHTML = `Hello, Dynamic!`;
+            document.body.appendChild(snd);
+        }
+    </script>
+    <button onclick="another()">Give me another!</button>
+    <div>
+        <div>
+            <x-test>
+                Hello, Static!
+            </x-test>
+        </div>
+    </div>
+    <y-will-be-ignored>
+        I will be ignored
+    </y-will-be-ignored>
+</body>
+</html>
